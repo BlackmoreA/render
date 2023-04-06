@@ -1,0 +1,23 @@
+{
+  "contacts" :
+          [
+            {
+              "DisplayName" : "Bruce Banner",
+              "ContactNumber" : "123-456-7890",
+              "EmailAddress" : "banner@dcmail,ca"
+            },
+
+            {
+              "DisplayName" : "Diana Prince",
+              "ContactNumber" : "098-765-4321",
+              "EmailAddress" : "prince@dcmail,ca"
+            },
+
+            {
+              "DisplayName" : "Clark Kent",
+              "ContactNumber" : "789-065-1243",
+              "EmailAddress" : "kent@dcmail,ca"
+            }
+
+          ]
+}

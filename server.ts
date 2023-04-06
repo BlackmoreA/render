@@ -1,43 +1,90 @@
-"use strict";
+#!/usr/bin/env node
 
-// Imports
+/**
+ * Module dependencies.
+ */
+
+import app from './server/config/app';
+import debug from 'debug';
+debug('temp:server');
 import http from 'http';
-import fs from 'fs';
-import mime from 'mime-types';
+import {HttpError} from "http-errors";
 
-// Declarations
-const port = process.env.PORT || 3000;
-let lookup = mime.lookup;
+/**
+ * Get port from environment and store in Express.
+ */
 
-// Configurations
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
 
-// Static Configurations
+/**
+ * Create HTTP server.
+ */
 
-const server = http.createServer((req, res) => {
-    let path : string = req.url as string;
-    if (path === "/" || path === "/home") {
-        path = "/index.html";
-    }
+const server = http.createServer(app);
 
-    console.log(__dirname);
+/**
+ * Listen on provided port, on all network interfaces.
+ */
 
-    let mime_type : string = lookup(path.substring(1)) as string;
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 
-    fs.readFile(__dirname + path, function(err, data) {
-        // Error
-        if (err) {
-            res.writeHead(404);
-            res.end("Error 404: File not found " + err.message);
-            return;
-        }
+/**
+ * Normalize a port into a number, string, or false.
+ */
 
-        // Used as a means to prevent any user from changing the content-type
-        res.setHeader("X-Content-Type-Options", "nosniff");
-        res.writeHead(200, {'Content-Type' : mime_type});
-        res.end(data);
-    });
-});
+function normalizePort(val : string) {
+  const port = parseInt(val, 10);
 
-server.listen(port, () => {
-    console.log(`Server running at: ${port}/`);
-});
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error : HttpError) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  let addr = server.address();
+  let bind = 'pipe ' + addr;
+  debug('Listening on ' + bind);
+}
