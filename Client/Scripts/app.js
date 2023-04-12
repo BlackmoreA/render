@@ -3,7 +3,6 @@
     function Start() {
         console.log("App Started!");
         let page_id = $("body")[0].getAttribute("id");
-        CheckLogin();
         switch (page_id) {
             case "home":
                 DisplayHomePage();
@@ -62,9 +61,6 @@
         $("#ServicesBtn").on("click", () => { location.href = "/services"; });
         $("#AboutUsBtn").on("click", () => { location.href = "/about"; });
         $("#ContactUsBtn").on("click", () => { location.href = "/contact"; });
-        $("main").append('<p id="MainParagraph" class="mt-3"> This is the Main Paragraph </p>');
-        $("main").append('<article>' +
-            '<p id="ArticleParagraph" class ="mt-3">This is my article paragraph</p></article>');
     }
     function DisplayProductsPage() {
         console.log("Display Products Called");
@@ -138,37 +134,6 @@
     }
     function DisplayLoginPage() {
         console.log("Display Login page Called");
-        let messageArea2 = $("#messageArea2");
-        messageArea2.hide();
-        $("#loginButton").on("click", function () {
-            let success = false;
-            let newUser = new core.User();
-            $.get("Data/user.json", function (data) {
-                for (const u of data.users) {
-                    let username = document.forms[0].username.value;
-                    let password = document.forms[0].password.value;
-                    if (username === u.UserName && password === u.Password) {
-                        success = true;
-                        newUser.fromJSON(u);
-                        break;
-                    }
-                }
-                if (success) {
-                    sessionStorage.setItem("user", newUser.serialize());
-                    messageArea2.removeAttr("class").hide();
-                    location.href = "/contact-list";
-                }
-                else {
-                    $("#username").trigger("focus").trigger("select");
-                    messageArea2.addClass("alert alert-danger").text("Failed to authenticate");
-                    messageArea2.show();
-                }
-            });
-        });
-        $("#cancelButton").on("click", function () {
-            document.forms[0].reset();
-            location.href = "/home";
-        });
     }
 })();
 //# sourceMappingURL=app.js.map
