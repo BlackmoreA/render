@@ -12,13 +12,21 @@ import flash from 'connect-flash';
 let localStrategy = passportLocal.Strategy;
 import User from '../models/user';
 
-import indexRouter from '../routes';
+import indexRouter from '../routes/index';
+import authRouter from '../routes/auth';
+import contactListRouter from '../routes/contact-list';
 import usersRouter from '../routes/users';
 
 import mongoose from 'mongoose';
 
 import * as DBConfig from './db';
 mongoose.connect(DBConfig.RemoteURI);
+
+import cors from 'cors';
+import passportJWT from 'passport-jwt';
+
+let JWTStrategy = passportJWT.Strategy;
+let ExtractJWT = passportJWT.ExtractJwt;
 
 const db = mongoose.connection;
 
@@ -42,6 +50,7 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, '../../Client')));
 app.use(express.static(path.join(__dirname, '../../node_modules')));
+app.use(cors());
 
 app.use(session ( {
   secret : DBConfig.SessionSecret,
@@ -57,8 +66,31 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+let jwtOptions =
+    {
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      secretOrKey: DBConfig.SessionSecret
+    }
+
+let strategy = new JWTStrategy(jwtOptions, function(jwt_payload, done) {
+  User.find({id: jwt_payload.sub}).then(function(user) {
+    if(user){
+      return done(null, user);
+    }else{
+      return done(null, false);
+    }
+  }).catch(function(err){
+    if(err){
+      return done(err, false);
+    }
+  });
+});
+
+passport.use(strategy);
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', authRouter);
+app.use('/', contactListRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

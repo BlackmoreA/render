@@ -1,4 +1,6 @@
 import express, {Request, Response, NextFunction} from "express";
+import jwt from 'jsonwebtoken';
+import * as DBConfig from '../config/db';
 
 export function UserDisplayName(req : Request) : string
 {
@@ -15,4 +17,19 @@ export function AuthGuard(req : Request, res : Response, next : NextFunction) : 
         return res.redirect('/login');
     }
     next();
+}
+
+export function GenerateToken(user : any) : string
+{
+    const payload = {
+        id: user.id,
+        DisplayName: user.DisplayName,
+        EmailAddress: user.EmailAddress,
+        username: user.username
+    }
+
+    const jwtOptions = {
+        expiresIn: 604800
+    }
+    return jwt.sign(payload, DBConfig.SessionSecret, jwtOptions);
 }
